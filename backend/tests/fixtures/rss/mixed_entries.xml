@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Mixed AI Feed</title>
+    <link>https://example.com/feed</link>
+    <item>
+      <title>Has excerpt and date</title>
+      <link>https://example.com/articles/complete</link>
+      <description>Complete excerpt</description>
+      <pubDate>Sat, 30 Aug 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Missing excerpt</title>
+      <link>https://example.com/articles/no-excerpt</link>
+      <pubDate>Sat, 30 Aug 2026 13:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Missing publication date</title>
+      <link>https://example.com/articles/no-date</link>
+      <description>Excerpt without a date</description>
+    </item>
+    <item>
+      <title>Missing article URL</title>
+      <description>Should be skipped</description>
+      <pubDate>Sat, 30 Aug 2026 14:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <link>https://example.com/articles/no-title</link>
+      <description>Should be skipped</description>
+    </item>
+    <item>
+      <title>   </title>
+      <link>https://example.com/articles/blank-title</link>
+      <description>Should be skipped</description>
+    </item>
+    <item>
+      <title>Invalid article URL</title>
+      <link>not-a-url</link>
+      <description>Should be skipped</description>
+    </item>
+    <item>
+      <title>HTML excerpt</title>
+      <link>https://example.com/articles/html</link>
+      <description><![CDATA[<p>Hello <b>world</b>.</p>]]></description>
+    </item>
+    <item>
+      <title>Still valid after malformed siblings</title>
+      <link>https://example.com/articles/after-malformed</link>
+      <description>Survived malformed entries</description>
+      <pubDate>Mon, 01 Sep 2026 09:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

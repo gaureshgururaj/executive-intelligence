@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example AI Feed</title>
+    <link>https://example.com/feed</link>
+    <item>
+      <title>First Article</title>
+      <link>https://example.com/articles/1</link>
+      <description>First excerpt</description>
+      <pubDate>Sat, 30 Aug 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Second Article</title>
+      <link>https://example.com/articles/2</link>
+      <description>Second excerpt</description>
+      <pubDate>Sun, 31 Aug 2026 15:30:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
