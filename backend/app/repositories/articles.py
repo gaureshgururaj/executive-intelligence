@@ -76,3 +76,15 @@ class ArticleRepository:
         if article is None:
             return None
         return StoredArticle.model_validate(article)
+
+    def list_accepted(self) -> list[StoredArticle]:
+        rows = self._session.scalars(
+            select(Article)
+            .where(Article.accepted.is_(True))
+            .order_by(
+                Article.published_at.desc().nulls_last(),
+                Article.created_at.desc(),
+                Article.id.desc(),
+            )
+        )
+        return [StoredArticle.model_validate(row) for row in rows]

@@ -1,14 +1,9 @@
-from collections.abc import Generator
 from datetime import UTC, datetime
 
-import pytest
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import inspect
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.db.schema import create_tables
 from app.domain.models import ArticleCandidate, QualityDecision, TrendAnalysis
 from app.pipeline.results import PipelineItem
 from app.repositories import ArticleRepository
@@ -64,32 +59,6 @@ def _failed_item() -> PipelineItem:
         candidate=_candidate(),
         error="LLM output is not valid JSON",
     )
-
-
-@pytest.fixture(scope="session")
-def postgres_engine() -> Generator[Engine, None, None]:
-    engine = create_engine(get_settings().database_url, pool_pre_ping=True)
-    try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
-    except OperationalError:
-        pytest.skip("PostgreSQL is not available")
-    create_tables(engine)
-    yield engine
-    engine.dispose()
-
-
-@pytest.fixture
-def db_session(postgres_engine: Engine) -> Generator[Session, None, None]:
-    connection = postgres_engine.connect()
-    transaction = connection.begin()
-    session = Session(bind=connection, autoflush=False, autocommit=False)
-    try:
-        yield session
-    finally:
-        session.close()
-        transaction.rollback()
-        connection.close()
 
 
 def test_articles_table_uses_postgres_types(postgres_engine: Engine) -> None:
