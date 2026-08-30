@@ -1,0 +1,59 @@
+---
+description: Engineering rules and architecture for the AI Executive Intelligence Platform
+alwaysApply: true
+---
+
+# AI Executive Intelligence Platform
+
+## Engineering philosophy
+
+This repository implements the AI-Powered Executive Intelligence Platform.
+
+The authoritative design documents are located in /docs.
+
+## Rules
+
+- Build incrementally.
+- Do not implement future architecture unless required by the current milestone.
+- Prefer simple solutions over premature distributed architecture.
+- Keep deterministic logic deterministic.
+- LLM outputs must be validated with Pydantic.
+- LLM providers must be abstracted from domain logic.
+- Agents should not directly access databases.
+- Business logic must be independently testable.
+- Mock LLM calls in unit tests.
+- Do not assert exact LLM prose in tests.
+- Add integration tests at system boundaries.
+- Use Python type hints everywhere.
+- Use TypeScript strict mode.
+- Never commit secrets.
+- Explain significant architectural choices before implementing them.
+- Do not add a dependency without explaining why it is needed.
+- Run tests and linting after every meaningful change.
+- Keep PR-sized changes small.
+- Do not refactor unrelated code.
+- Follow the existing repository architecture rather than inventing new patterns.
+
+## Architecture direction
+
+Eventual stack:
+- Next.js 16
+- FastAPI
+- Google ADK
+- LiteLLM
+- FastMCP
+- PostgreSQL
+- Pinecone
+- Celery
+- Redis
+- Langfuse
+- Sentry
+- Pydantic
+
+This is the eventual architecture, NOT a requirement to introduce every component immediately.
+
+## Current priority
+
+Build one working vertical slice before expanding scope:
+
+RSS → Trend Agent → Quality Gate → Persistence → API → Dashboard.
