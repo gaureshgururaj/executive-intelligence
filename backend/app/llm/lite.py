@@ -20,18 +20,28 @@ def _response_text(response: Any) -> str:
 class LiteLlmClient:
     """LlmClient adapter. Isolates LiteLLM from agents and domain code."""
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, json_schema: dict[str, Any] | None = None) -> None:
         stripped = model.strip()
         if not stripped:
             raise LlmClientError("model name is required")
         self._model = stripped
+        self._json_schema = json_schema
 
     def complete(self, prompt: str) -> str:
+        kwargs: dict[str, Any] = {
+            "model": self._model,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        if self._json_schema is not None:
+            kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "trend_analysis",
+                    "schema": self._json_schema,
+                },
+            }
         try:
-            response = litellm.completion(
-                model=self._model,
-                messages=[{"role": "user", "content": prompt}],
-            )
+            response = litellm.completion(**kwargs)
         except LlmClientError:
             raise
         except Exception as exc:

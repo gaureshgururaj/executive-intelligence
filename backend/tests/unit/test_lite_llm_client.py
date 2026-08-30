@@ -44,6 +44,7 @@ def test_complete_passes_prompt_and_model_to_litellm() -> None:
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": "classify this article"}],
     )
+    assert "response_format" not in mock.call_args.kwargs
 
 
 def test_configured_model_name_is_passed_through() -> None:
@@ -52,6 +53,30 @@ def test_configured_model_name_is_passed_through() -> None:
         client.complete("hello")
 
     assert mock.call_args.kwargs["model"] == "claude-sonnet-4-5"
+    assert "response_format" not in mock.call_args.kwargs
+
+
+def test_json_schema_is_passed_as_structured_response_format() -> None:
+    schema = {
+        "type": "object",
+        "properties": {"summary": {"type": "string"}},
+    }
+    client = LiteLlmClient(model="claude-haiku-4-5", json_schema=schema)
+    with patch("app.llm.lite.litellm.completion", return_value=_response("{}")) as mock:
+        result = client.complete("classify this article")
+
+    assert result == "{}"
+    mock.assert_called_once_with(
+        model="claude-haiku-4-5",
+        messages=[{"role": "user", "content": "classify this article"}],
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "trend_analysis",
+                "schema": schema,
+            },
+        },
+    )
 
 
 def test_response_content_is_returned_as_plain_string() -> None:
