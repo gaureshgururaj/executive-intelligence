@@ -18,6 +18,7 @@ class Settings(BaseSettings):
         "postgresql+psycopg://executive:executive@localhost:5432/executive_intelligence"
     )
     api_cors_origins: str = "http://localhost:3000"
+    llm_model: str = "gpt-4o-mini"
 
     def cors_origin_list(self) -> list[str]:
         return [
