@@ -7,28 +7,20 @@ From backend/:
   PYTHONPATH=. python scripts/run_live_rss_checkpoint.py
 """
 
-from app.agents.errors import TrendAgentError
-from app.agents.trend import TrendAgent
 from app.config import get_settings
 from app.db.schema import create_tables
 from app.db.session import get_engine, get_session_factory
-from app.domain.models import ArticleCandidate, TrendAnalysis
-from app.ingestion import ingest_rss
-from app.llm.errors import LlmClientError
+from app.domain.models import TrendAnalysis
 from app.llm.lite import LiteLlmClient
-from app.pipeline.results import PipelineItem
-from app.quality import QualityGate
-from app.repositories import ArticleRepository
+from app.pipeline import FeedIngestion, FeedItemResult
 
 DEFAULT_FEED_URL = "https://openai.com/news/rss.xml"
 MAX_ARTICLES = 3
 
 
-def _print_item_result(
-    candidate: ArticleCandidate,
-    item: PipelineItem,
-    persisted: bool,
-) -> None:
+def _print_item_result(result: FeedItemResult) -> None:
+    item = result.item
+    candidate = item.candidate
     analysis_ok = item.error is None and item.analysis is not None
     analysis = item.analysis
     decision = item.decision
@@ -49,7 +41,7 @@ def _print_item_result(
     print(f"relevance:  {score}")
     print(f"decision:   {verdict}")
     print(f"detail:     {reason}")
-    print(f"persisted:  {'yes' if persisted else 'no'}")
+    print(f"persisted:  {'yes' if result.stored is not None else 'no'}")
     print()
 
 
@@ -61,37 +53,22 @@ def main() -> None:
     print(f"limit: {MAX_ARTICLES} candidates before any LLM call")
     print()
 
-    candidates = ingest_rss(feed_url)
-    candidates = candidates[:MAX_ARTICLES]
-    print(f"processing {len(candidates)} candidate(s)\n")
-
     llm = LiteLlmClient(
         model=settings.llm_model,
         json_schema=TrendAnalysis.model_json_schema(),
     )
-    trend_agent = TrendAgent(llm)
-    quality_gate = QualityGate()
 
     create_tables(get_engine())
     session = get_session_factory()()
     try:
-        repo = ArticleRepository(session)
-        for candidate in candidates:
-            try:
-                analysis = trend_agent.analyze(candidate)
-            except (TrendAgentError, LlmClientError) as exc:
-                item = PipelineItem(candidate=candidate, error=str(exc))
-                _print_item_result(candidate, item, persisted=False)
-                continue
-
-            decision = quality_gate.evaluate(candidate, analysis)
-            item = PipelineItem(
-                candidate=candidate,
-                analysis=analysis,
-                decision=decision,
-            )
-            stored = repo.save_pipeline_item(item)
-            _print_item_result(candidate, item, persisted=stored is not None)
+        results = FeedIngestion(llm).run(
+            feed_url,
+            session,
+            max_articles=MAX_ARTICLES,
+        )
+        print(f"processing {len(results)} candidate(s)\n")
+        for result in results:
+            _print_item_result(result)
         session.commit()
         print("committed")
     except Exception:

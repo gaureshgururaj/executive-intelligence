@@ -6,6 +6,7 @@ import pytest
 
 from app.domain.models import ArticleCandidate
 from app.ingestion.errors import RssFetchError
+from app.llm.errors import LlmClientError
 from app.pipeline import TrendPipeline
 from app.quality import QualityGate
 
@@ -133,6 +134,29 @@ def test_trend_agent_failure_does_not_erase_neighbors() -> None:
 
     assert items[0].decision is not None and items[0].decision.accepted is True
     assert items[1].error == "LLM output is not valid JSON"
+    assert items[1].analysis is None
+    assert items[1].decision is None
+    assert items[2].decision is not None and items[2].decision.accepted is False
+
+
+def test_llm_client_error_does_not_erase_neighbors() -> None:
+    class MixedLlmClient:
+        def complete(self, prompt: str) -> str:
+            if FAILED.canonical_url in prompt:
+                raise LlmClientError("LiteLLM completion failed for model test")
+            if ACCEPTED.canonical_url in prompt:
+                return ACCEPTED_JSON
+            if REJECTED.canonical_url in prompt:
+                return REJECTED_JSON
+            raise AssertionError(f"no LLM fixture for prompt: {prompt}")
+
+    items = TrendPipeline(
+        llm=MixedLlmClient(),
+        quality_gate=QualityGate(),
+    ).process_candidates([ACCEPTED, FAILED, REJECTED])
+
+    assert items[0].decision is not None and items[0].decision.accepted is True
+    assert items[1].error == "LiteLLM completion failed for model test"
     assert items[1].analysis is None
     assert items[1].decision is None
     assert items[2].decision is not None and items[2].decision.accepted is False
