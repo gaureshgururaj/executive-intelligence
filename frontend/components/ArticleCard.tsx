@@ -1,4 +1,5 @@
 import type { Article } from "@/lib/api";
+import { relevancePercent } from "@/lib/filter-articles";
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -19,10 +20,6 @@ function articleDate(article: Article): { iso: string; label: string } | null {
     return null;
   }
   return { iso, label: formatDate(iso) };
-}
-
-function relevancePercent(score: number): number {
-  return Math.round(score * 100);
 }
 
 export default function ArticleCard({ article }: { article: Article }) {

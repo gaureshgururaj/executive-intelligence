@@ -1,4 +1,4 @@
-import ArticleCard from "@/components/ArticleCard";
+import ArticleFeed from "@/components/ArticleFeed";
 import HealthIndicator from "@/components/HealthIndicator";
 import { fetchArticles } from "@/lib/api";
 
@@ -21,21 +21,7 @@ export default async function HomePage() {
         <HealthIndicator />
       </header>
 
-      {articles.length === 0 ? (
-        <section className="empty" aria-live="polite">
-          <h2>No accepted intelligence yet</h2>
-          <p>
-            When the pipeline publishes accepted articles, they will appear
-            here.
-          </p>
-        </section>
-      ) : (
-        <section className="feed" aria-label="Accepted articles">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </section>
-      )}
+      <ArticleFeed articles={articles} />
     </main>
   );
 }

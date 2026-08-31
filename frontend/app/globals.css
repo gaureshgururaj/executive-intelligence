@@ -103,6 +103,101 @@ h1 {
   gap: 1rem;
 }
 
+.feed-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.feed-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.feed-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 11rem;
+  flex: 1;
+}
+
+.feed-field span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.feed-field select,
+.feed-field input[type="range"] {
+  appearance: auto;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.6rem;
+}
+
+.feed-field-slider {
+  min-width: 14rem;
+  flex: 1.4;
+}
+
+.feed-field-slider span {
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.feed-field input[type="range"] {
+  width: 100%;
+  padding: 0.55rem 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--accent);
+}
+
+.feed-toolbar-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.clear-filters {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0;
+  cursor: pointer;
+}
+
+.clear-filters:disabled {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.65;
+}
+
+.clear-filters:not(:disabled):hover,
+.clear-filters:not(:disabled):focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.feed-count {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -310,5 +405,23 @@ h1 {
 
   .badge {
     max-width: 100%;
+  }
+
+  .feed-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .feed-field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .feed-field-slider {
+    min-width: 0;
+  }
+
+  .clear-filters {
+    align-self: flex-start;
   }
 }
