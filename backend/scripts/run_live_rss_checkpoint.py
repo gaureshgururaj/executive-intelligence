@@ -19,7 +19,42 @@ MAX_ARTICLES = 3
 
 
 def _print_item_result(result: FeedItemResult) -> None:
+    if result.skipped:
+        stored = result.stored
+        title = stored.title if stored is not None else "n/a"
+        print(f"title:      {title}")
+        print("analysis:   skipped")
+        print(f"category:   {stored.category if stored is not None else 'n/a'}")
+        print(
+            "relevance:  "
+            + (f"{stored.relevance_score:.2f}" if stored is not None else "n/a")
+        )
+        if stored is None:
+            verdict = "n/a"
+        elif stored.accepted:
+            verdict = "accepted"
+        else:
+            verdict = "rejected"
+        print(f"decision:   {verdict}")
+        print("detail:     n/a")
+        print("skipped:    yes")
+        print("persisted:  no")
+        print()
+        return
+
     item = result.item
+    if item is None:
+        print("title:      n/a")
+        print("analysis:   n/a")
+        print("category:   n/a")
+        print("relevance:  n/a")
+        print("decision:   n/a")
+        print("detail:     n/a")
+        print("skipped:    no")
+        print("persisted:  no")
+        print()
+        return
+
     candidate = item.candidate
     analysis_ok = item.error is None and item.analysis is not None
     analysis = item.analysis
@@ -41,6 +76,7 @@ def _print_item_result(result: FeedItemResult) -> None:
     print(f"relevance:  {score}")
     print(f"decision:   {verdict}")
     print(f"detail:     {reason}")
+    print("skipped:    no")
     print(f"persisted:  {'yes' if result.stored is not None else 'no'}")
     print()
 

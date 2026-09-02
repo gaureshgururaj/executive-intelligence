@@ -62,8 +62,19 @@ def _source(name: str, url: str) -> StoredSource:
     )
 
 
-def _item(*, accepted: bool | None, error: str | None, stored: bool) -> MagicMock:
+def _item(
+    *,
+    accepted: bool | None,
+    error: str | None,
+    stored: bool,
+    skipped: bool = False,
+) -> MagicMock:
     result = MagicMock()
+    result.skipped = skipped
+    if skipped:
+        result.item = None
+        result.stored = MagicMock()
+        return result
     result.item.error = error
     if accepted is None:
         result.item.decision = None
@@ -175,6 +186,7 @@ def test_item_level_errors_still_commit() -> None:
             source_name="A",
             source_url=URL_A,
             processed=3,
+            skipped=0,
             persisted=2,
             accepted=1,
             rejected=1,
@@ -268,3 +280,38 @@ def test_max_articles_is_forwarded_per_source() -> None:
 
     assert [call[2] for call in ingestion.calls] == [3, 3]
     assert [call[0] for call in ingestion.calls] == [URL_A, URL_B]
+
+
+def test_skipped_items_are_counted_separately_and_still_commit() -> None:
+    source = _source("A", URL_A)
+    sessions, factory = _factory()
+    items = [
+        _item(accepted=None, error=None, stored=True, skipped=True),
+        _item(accepted=None, error=None, stored=True, skipped=True),
+        _item(accepted=None, error=None, stored=True, skipped=True),
+    ]
+    ingestion = StubIngestion({URL_A: items})
+    with patch(
+        "app.pipeline.enabled.SourceRepository.list_enabled",
+        return_value=[source],
+    ):
+        results = EnabledSourceIngestionRunner(factory, ingestion).run()
+
+    assert results == [
+        SourceRunResult(
+            source_id=source.id,
+            source_name="A",
+            source_url=URL_A,
+            processed=0,
+            skipped=3,
+            persisted=0,
+            accepted=0,
+            rejected=0,
+            failed=0,
+            error=None,
+        )
+    ]
+    ingest_session = sessions[1]
+    assert ingest_session.commit_calls == 1
+    assert ingest_session.rollback_calls == 0
+    assert ingest_session.close_calls == 1

@@ -19,6 +19,7 @@ class SourceRunResult:
     source_name: str
     source_url: str
     processed: int
+    skipped: int
     persisted: int
     accepted: int
     rejected: int
@@ -32,6 +33,7 @@ def _empty_result(source: StoredSource, error: str) -> SourceRunResult:
         source_name=source.name,
         source_url=source.url,
         processed=0,
+        skipped=0,
         persisted=0,
         accepted=0,
         rejected=0,
@@ -41,16 +43,26 @@ def _empty_result(source: StoredSource, error: str) -> SourceRunResult:
 
 
 def _summarize(source: StoredSource, items: list[FeedItemResult]) -> SourceRunResult:
+    processed = 0
+    skipped = 0
     persisted = 0
     accepted = 0
     rejected = 0
     failed = 0
     for result in items:
-        if result.item.error is not None:
+        if result.skipped:
+            skipped += 1
+            continue
+        processed += 1
+        if result.item is not None and result.item.error is not None:
             failed += 1
         if result.stored is not None:
             persisted += 1
-            if result.item.decision is not None and result.item.decision.accepted:
+            if (
+                result.item is not None
+                and result.item.decision is not None
+                and result.item.decision.accepted
+            ):
                 accepted += 1
             else:
                 rejected += 1
@@ -58,7 +70,8 @@ def _summarize(source: StoredSource, items: list[FeedItemResult]) -> SourceRunRe
         source_id=source.id,
         source_name=source.name,
         source_url=source.url,
-        processed=len(items),
+        processed=processed,
+        skipped=skipped,
         persisted=persisted,
         accepted=accepted,
         rejected=rejected,

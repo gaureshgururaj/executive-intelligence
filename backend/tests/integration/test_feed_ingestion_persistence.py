@@ -107,6 +107,8 @@ def test_accepted_and_rejected_persist_failed_does_not(db_session: Session) -> N
     assert rejected.quality_reason == "Relevance score below threshold"
     assert repo.get_by_canonical_url(FAILED.canonical_url) is None
     assert results[2].stored is None
+    assert results[2].skipped is False
+    assert results[2].item is not None
     assert results[2].item.error is not None
 
 
@@ -156,3 +158,72 @@ def test_duplicate_canonical_url_updates_in_place(db_session: Session) -> None:
     assert stored.relevance_score == 0.4
     assert stored.accepted is False
     assert stored.quality_reason == "Relevance score below threshold"
+
+
+def test_unchanged_accepted_candidate_is_skipped(db_session: Session) -> None:
+    llm = MappingLlmClient({ACCEPTED.canonical_url: ACCEPTED_JSON})
+    with patch("app.pipeline.feed.ingest_rss", return_value=[ACCEPTED]):
+        first = FeedIngestion(llm, quality_gate=QualityGate()).run(FEED_URL, db_session)
+    assert first[0].stored is not None
+    first_updated = first[0].stored.updated_at
+    calls_after_insert = llm.complete_calls
+
+    with patch("app.pipeline.feed.ingest_rss", return_value=[ACCEPTED]):
+        second = FeedIngestion(llm, quality_gate=QualityGate()).run(
+            FEED_URL,
+            db_session,
+        )
+
+    assert llm.complete_calls == calls_after_insert
+    assert second[0].skipped is True
+    assert second[0].item is None
+    assert second[0].stored is not None
+    assert second[0].stored.id == first[0].stored.id
+    assert second[0].stored.updated_at == first_updated
+    assert second[0].stored.summary == first[0].stored.summary
+
+
+def test_unchanged_rejected_candidate_is_skipped(db_session: Session) -> None:
+    llm = MappingLlmClient({REJECTED.canonical_url: REJECTED_JSON})
+    with patch("app.pipeline.feed.ingest_rss", return_value=[REJECTED]):
+        first = FeedIngestion(llm, quality_gate=QualityGate()).run(FEED_URL, db_session)
+    assert first[0].stored is not None
+    calls_after_insert = llm.complete_calls
+
+    with patch("app.pipeline.feed.ingest_rss", return_value=[REJECTED]):
+        second = FeedIngestion(llm, quality_gate=QualityGate()).run(
+            FEED_URL,
+            db_session,
+        )
+
+    assert llm.complete_calls == calls_after_insert
+    assert second[0].skipped is True
+    assert second[0].item is None
+    assert second[0].stored is not None
+    assert second[0].stored.accepted is False
+    assert second[0].stored.updated_at == first[0].stored.updated_at
+
+
+def test_changed_candidate_reprocesses_same_id(db_session: Session) -> None:
+    first_llm = MappingLlmClient({ACCEPTED.canonical_url: ACCEPTED_JSON})
+    with patch("app.pipeline.feed.ingest_rss", return_value=[ACCEPTED]):
+        first = FeedIngestion(first_llm, quality_gate=QualityGate()).run(
+            FEED_URL,
+            db_session,
+        )
+    assert first[0].stored is not None
+
+    updated_candidate = ACCEPTED.model_copy(update={"title": "Updated title only"})
+    second_llm = MappingLlmClient({ACCEPTED.canonical_url: UPDATED_JSON})
+    with patch("app.pipeline.feed.ingest_rss", return_value=[updated_candidate]):
+        second = FeedIngestion(second_llm, quality_gate=QualityGate()).run(
+            FEED_URL,
+            db_session,
+        )
+    stored = second[0].stored
+    assert second[0].skipped is False
+    assert stored is not None
+    assert stored.id == first[0].stored.id
+    assert stored.title == "Updated title only"
+    assert stored.summary == "Updated summary after a second ingest."
+    assert stored.updated_at >= first[0].stored.updated_at

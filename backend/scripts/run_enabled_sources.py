@@ -24,6 +24,7 @@ def _print_source_result(result: SourceRunResult) -> None:
     print(f"id:         {result.source_id}")
     print(f"status:     {status}")
     print(f"processed:  {result.processed}")
+    print(f"skipped:    {result.skipped}")
     print(f"persisted:  {result.persisted}")
     print(f"accepted:   {result.accepted}")
     print(f"rejected:   {result.rejected}")

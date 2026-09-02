@@ -185,3 +185,17 @@ def test_get_by_canonical_url_returns_stored_article(db_session: Session) -> Non
 def test_unknown_canonical_url_returns_none(db_session: Session) -> None:
     repo = ArticleRepository(db_session)
     assert repo.get_by_canonical_url("https://example.com/missing") is None
+
+
+def test_get_by_canonical_urls_returns_empty_for_no_urls(db_session: Session) -> None:
+    repo = ArticleRepository(db_session)
+    assert repo.get_by_canonical_urls([]) == {}
+
+
+def test_get_by_canonical_urls_returns_known_rows_only(db_session: Session) -> None:
+    repo = ArticleRepository(db_session)
+    saved = repo.save_pipeline_item(_accepted_item())
+    assert saved is not None
+    found = repo.get_by_canonical_urls([CANONICAL_URL, "https://example.com/missing"])
+    assert list(found) == [CANONICAL_URL]
+    assert found[CANONICAL_URL] == saved

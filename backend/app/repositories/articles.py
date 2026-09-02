@@ -77,6 +77,14 @@ class ArticleRepository:
             return None
         return StoredArticle.model_validate(article)
 
+    def get_by_canonical_urls(self, urls: list[str]) -> dict[str, StoredArticle]:
+        if not urls:
+            return {}
+        rows = self._session.scalars(
+            select(Article).where(Article.canonical_url.in_(urls))
+        )
+        return {row.canonical_url: StoredArticle.model_validate(row) for row in rows}
+
     def list_accepted(self) -> list[StoredArticle]:
         rows = self._session.scalars(
             select(Article)
