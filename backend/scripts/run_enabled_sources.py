@@ -5,7 +5,16 @@ Not invoked by pytest. Makes real network and LLM calls.
 From backend/:
 
   PYTHONPATH=. python scripts/run_enabled_sources.py
+
+A host cron or hosted scheduler should invoke this same command. The scheduler
+decides WHEN to run; this script decides HOW to construct dependencies and
+WHAT to ingest. Source-level transaction behavior stays in
+EnabledSourceIngestionRunner.
 """
+
+from __future__ import annotations
+
+import sys
 
 from app.config import get_settings
 from app.db.schema import create_tables
@@ -14,7 +23,18 @@ from app.domain.models import TrendAnalysis
 from app.llm.lite import LiteLlmClient
 from app.pipeline import EnabledSourceIngestionRunner, FeedIngestion, SourceRunResult
 
-MAX_ARTICLES = 3
+
+def exit_code_for(results: list[SourceRunResult]) -> int:
+    """Map completed source runs to a Unix process exit code.
+
+    Zero enabled sources and completed source transactions exit 0, including
+    item-level failures that the runner already committed. Any source-level
+    error exits 1. Setup/discovery exceptions are not handled here and
+    propagate as a non-zero process exit.
+    """
+    if any(result.error is not None for result in results):
+        return 1
+    return 0
 
 
 def _print_source_result(result: SourceRunResult) -> None:
@@ -33,10 +53,13 @@ def _print_source_result(result: SourceRunResult) -> None:
     print()
 
 
-def main() -> None:
+def main() -> int:
     settings = get_settings()
     print(f"model: {settings.llm_model}")
-    print(f"limit: {MAX_ARTICLES} candidates per source before any LLM call")
+    print(
+        f"limit: {settings.ingest_max_articles} candidates per source "
+        "before any LLM call"
+    )
     print()
 
     llm = LiteLlmClient(
@@ -48,11 +71,12 @@ def main() -> None:
         session_factory=get_session_factory(),
         ingestion=FeedIngestion(llm),
     )
-    results = runner.run(max_articles=MAX_ARTICLES)
+    results = runner.run(max_articles=settings.ingest_max_articles)
     print(f"enabled sources: {len(results)}\n")
     for result in results:
         _print_source_result(result)
+    return exit_code_for(results)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

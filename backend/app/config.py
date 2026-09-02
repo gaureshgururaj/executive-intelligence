@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     )
     api_cors_origins: str = "http://localhost:3000"
     llm_model: str = "gpt-4o-mini"
+    ingest_max_articles: int = 3
 
     def cors_origin_list(self) -> list[str]:
         return [
