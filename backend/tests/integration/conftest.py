@@ -7,7 +7,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db.models import Article, Source
+from app.db.models import Article, Paper, Source
 from app.db.schema import create_tables
 
 
@@ -29,6 +29,7 @@ def db_session(postgres_engine: Engine) -> Generator[Session, None, None]:
     connection = postgres_engine.connect()
     transaction = connection.begin()
     session = Session(bind=connection, autoflush=False, autocommit=False)
+    session.execute(delete(Paper))
     session.execute(delete(Article))
     session.execute(delete(Source))
     session.flush()

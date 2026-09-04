@@ -65,3 +65,42 @@ class Source(Base):
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
+
+
+class Paper(Base):
+    __tablename__ = "papers"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    arxiv_id: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    abstract: Mapped[str] = mapped_column(Text, nullable=False)
+    authors: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    arxiv_updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    paper_url: Mapped[str] = mapped_column(Text, nullable=False)
+    pdf_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    categories: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    category: Mapped[str] = mapped_column(Text, nullable=False)
+    relevance_score: Mapped[float] = mapped_column(Float, nullable=False)
+    key_findings: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    practical_implications: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    accepted: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    quality_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
