@@ -119,6 +119,30 @@ class TrendAnalysis(BaseModel):
         return cleaned
 
 
+class ResearchAnalysis(BaseModel):
+    summary: str = Field(min_length=1)
+    category: str = Field(min_length=1)
+    relevance_score: float = Field(ge=0.0, le=1.0)
+    key_findings: list[str] = Field(default_factory=list)
+    practical_implications: list[str] = Field(default_factory=list)
+
+    @field_validator("summary", "category")
+    @classmethod
+    def strip_required_text(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("must not be blank")
+        return stripped
+
+    @field_validator("key_findings", "practical_implications")
+    @classmethod
+    def list_items_not_blank(cls, value: list[str]) -> list[str]:
+        cleaned = [item.strip() for item in value]
+        if any(not item for item in cleaned):
+            raise ValueError("must not contain blank strings")
+        return cleaned
+
+
 class QualityDecision(BaseModel):
     accepted: bool
     reason: str | None = None

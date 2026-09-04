@@ -7,6 +7,7 @@ from app.domain.models import (
     ArticleCandidate,
     PaperCandidate,
     QualityDecision,
+    ResearchAnalysis,
     TrendAnalysis,
 )
 
@@ -146,4 +147,55 @@ def test_paper_candidate_rejects_invalid_paper_url() -> None:
             abstract="Abstract",
             authors=["Ada Lovelace"],
             paper_url="not-a-url",
+        )
+
+
+def test_research_analysis_accepts_empty_lists() -> None:
+    analysis = ResearchAnalysis(
+        summary="A routing method may cut failed tool calls.",
+        category="Agentic AI",
+        relevance_score=0.5,
+        key_findings=[],
+        practical_implications=[],
+    )
+    assert analysis.key_findings == []
+    assert analysis.practical_implications == []
+
+
+def test_research_analysis_rejects_relevance_score_out_of_range() -> None:
+    with pytest.raises(ValidationError):
+        ResearchAnalysis(
+            summary="A routing method may cut failed tool calls.",
+            category="Agentic AI",
+            relevance_score=1.2,
+            key_findings=["Point one"],
+        )
+
+
+def test_research_analysis_rejects_blank_key_findings() -> None:
+    with pytest.raises(ValidationError):
+        ResearchAnalysis(
+            summary="A routing method may cut failed tool calls.",
+            category="Agentic AI",
+            relevance_score=0.8,
+            key_findings=["Point one", "  "],
+        )
+
+
+def test_research_analysis_rejects_blank_practical_implications() -> None:
+    with pytest.raises(ValidationError):
+        ResearchAnalysis(
+            summary="A routing method may cut failed tool calls.",
+            category="Agentic AI",
+            relevance_score=0.8,
+            practical_implications=["  "],
+        )
+
+
+def test_research_analysis_rejects_blank_summary() -> None:
+    with pytest.raises(ValidationError):
+        ResearchAnalysis(
+            summary="   ",
+            category="Agentic AI",
+            relevance_score=0.8,
         )
