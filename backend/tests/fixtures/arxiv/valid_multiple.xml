@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>arXiv Query: search_query</title>
+  <id>https://arxiv.org/api/cIXucSHyLEqKgkwxGYN50g</id>
+  <updated>2026-09-03T00:00:00Z</updated>
+  <entry>
+    <id>http://arxiv.org/abs/2401.00001v1</id>
+    <published>2026-09-01T12:00:00Z</published>
+    <updated>2026-09-01T12:00:00Z</updated>
+    <title>First Paper</title>
+    <summary>First abstract.</summary>
+    <author>
+      <name>Ada Lovelace</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.00001v1" rel="alternate" type="text/html"/>
+    <link href="http://arxiv.org/pdf/2401.00001v1" rel="related" type="application/pdf" title="pdf"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.00002v2</id>
+    <published>2026-09-02T15:30:00Z</published>
+    <updated>2026-09-03T09:00:00Z</updated>
+    <title>Second Paper</title>
+    <summary>Second abstract.</summary>
+    <author>
+      <name>Alan Turing</name>
+    </author>
+    <author>
+      <name>Grace Hopper</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.00002v2" rel="alternate" type="text/html"/>
+    <link href="http://arxiv.org/pdf/2401.00002v2" rel="related" type="application/pdf" title="pdf"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

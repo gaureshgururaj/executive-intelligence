@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>arXiv Query: mixed</title>
+  <id>https://arxiv.org/api/mixed</id>
+  <updated>2026-09-03T00:00:00Z</updated>
+  <entry>
+    <id>http://arxiv.org/abs/2401.11111v1</id>
+    <published>2026-09-01T10:00:00Z</published>
+    <updated>2026-09-01T11:00:00Z</updated>
+    <title>Has pdf and dates</title>
+    <summary>Complete abstract.</summary>
+    <author>
+      <name>Complete Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.11111v1" rel="alternate" type="text/html"/>
+    <link href="http://arxiv.org/pdf/2401.11111v1" rel="related" type="application/pdf" title="pdf"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.22222v1</id>
+    <published>2026-09-01T12:00:00Z</published>
+    <updated>2026-09-01T12:00:00Z</updated>
+    <title>Missing pdf</title>
+    <summary>Abstract without a PDF link.</summary>
+    <author>
+      <name>No Pdf Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.22222v1" rel="alternate" type="text/html"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/hep-th/9901001v1</id>
+    <published>1999-01-01T00:00:00Z</published>
+    <updated>1999-01-02T00:00:00Z</updated>
+    <title>Old Style Identifier</title>
+    <summary>An old-style arXiv identifier.</summary>
+    <author>
+      <name>Old Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/hep-th/9901001v1" rel="alternate" type="text/html"/>
+    <link href="http://arxiv.org/pdf/hep-th/9901001v1" rel="related" type="application/pdf" title="pdf"/>
+    <category term="hep-th" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.33333v1</id>
+    <title>
+      Large
+      Language
+      Models
+    </title>
+    <summary>
+      An abstract
+      with   extra
+      whitespace.
+    </summary>
+    <author>
+      <name>  Whitespace Author  </name>
+    </author>
+    <author>
+      <name>   </name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.33333v1" rel="alternate" type="text/html"/>
+    <category term="  cs.CL  " scheme="http://arxiv.org/schemas/atom"/>
+    <category term="   " scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.44444v1</id>
+    <title>Missing dates</title>
+    <summary>Abstract without timestamps.</summary>
+    <author>
+      <name>Dateless Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.44444v1" rel="alternate" type="text/html"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.55555v1</id>
+    <published>2026-09-01T14:00:00Z</published>
+    <summary>Should be skipped for missing title.</summary>
+    <author>
+      <name>No Title Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.55555v1" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <published>2026-09-01T14:30:00Z</published>
+    <title>Missing identifier</title>
+    <summary>Should be skipped for missing id.</summary>
+    <author>
+      <name>No Id Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.66666v1" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/not-valid</id>
+    <published>2026-09-01T15:00:00Z</published>
+    <title>Invalid identifier</title>
+    <summary>Should be skipped for invalid id.</summary>
+    <author>
+      <name>Bad Id Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/not-valid" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.77777v1</id>
+    <published>2026-09-01T15:30:00Z</published>
+    <title>Missing abstract</title>
+    <author>
+      <name>No Abstract Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.77777v1" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.88888v1</id>
+    <published>2026-09-01T16:00:00Z</published>
+    <title>No authors</title>
+    <summary>Should be skipped for missing authors.</summary>
+    <link href="http://arxiv.org/abs/2401.88888v1" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <id>2401.99991v1</id>
+    <published>2026-09-01T16:30:00Z</published>
+    <title>Invalid paper URL</title>
+    <summary>Should be skipped for a bad locator.</summary>
+    <author>
+      <name>Bad Url Author</name>
+    </author>
+    <link href="not-a-url" rel="alternate" type="text/html"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.99999v1</id>
+    <published>2026-09-01T17:00:00Z</published>
+    <updated>2026-09-01T17:00:00Z</updated>
+    <title>Still valid after malformed siblings</title>
+    <summary>Survived malformed entries.</summary>
+    <author>
+      <name>Survivor Author</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.99999v1" rel="alternate" type="text/html"/>
+    <link href="http://arxiv.org/pdf/2401.99999v1" rel="related" type="application/pdf" title="pdf"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

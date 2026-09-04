@@ -3,7 +3,12 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from app.domain.models import ArticleCandidate, QualityDecision, TrendAnalysis
+from app.domain.models import (
+    ArticleCandidate,
+    PaperCandidate,
+    QualityDecision,
+    TrendAnalysis,
+)
 
 VALID_URL = "https://example.com/article"
 
@@ -68,3 +73,77 @@ def test_quality_decision_accepts_rejection_with_reason() -> None:
     decision = QualityDecision(accepted=False, reason="duplicate")
     assert decision.accepted is False
     assert decision.reason == "duplicate"
+
+
+def test_paper_candidate_accepts_valid_payload() -> None:
+    paper = PaperCandidate(
+        arxiv_id="  2401.00001  ",
+        title="  Large\nLanguage  Models  ",
+        abstract="  An abstract\nwith space.  ",
+        authors=["  Ada Lovelace  ", "  "],
+        paper_url="http://arxiv.org/abs/2401.00001v1",
+        pdf_url="http://arxiv.org/pdf/2401.00001v1",
+        categories=["  cs.LG  ", "   "],
+    )
+    assert paper.arxiv_id == "2401.00001"
+    assert paper.title == "Large Language Models"
+    assert paper.abstract == "An abstract with space."
+    assert paper.authors == ["Ada Lovelace"]
+    assert paper.categories == ["cs.LG"]
+    assert paper.pdf_url == "http://arxiv.org/pdf/2401.00001v1"
+
+
+def test_paper_candidate_allows_missing_pdf_url() -> None:
+    paper = PaperCandidate(
+        arxiv_id="2401.00001",
+        title="Title",
+        abstract="Abstract",
+        authors=["Ada Lovelace"],
+        paper_url="http://arxiv.org/abs/2401.00001",
+        pdf_url=None,
+    )
+    assert paper.pdf_url is None
+
+
+def test_paper_candidate_rejects_blank_title() -> None:
+    with pytest.raises(ValidationError):
+        PaperCandidate(
+            arxiv_id="2401.00001",
+            title="   ",
+            abstract="Abstract",
+            authors=["Ada Lovelace"],
+            paper_url="http://arxiv.org/abs/2401.00001",
+        )
+
+
+def test_paper_candidate_rejects_blank_arxiv_id() -> None:
+    with pytest.raises(ValidationError):
+        PaperCandidate(
+            arxiv_id="   ",
+            title="Title",
+            abstract="Abstract",
+            authors=["Ada Lovelace"],
+            paper_url="http://arxiv.org/abs/2401.00001",
+        )
+
+
+def test_paper_candidate_rejects_empty_authors() -> None:
+    with pytest.raises(ValidationError):
+        PaperCandidate(
+            arxiv_id="2401.00001",
+            title="Title",
+            abstract="Abstract",
+            authors=["  "],
+            paper_url="http://arxiv.org/abs/2401.00001",
+        )
+
+
+def test_paper_candidate_rejects_invalid_paper_url() -> None:
+    with pytest.raises(ValidationError):
+        PaperCandidate(
+            arxiv_id="2401.00001",
+            title="Title",
+            abstract="Abstract",
+            authors=["Ada Lovelace"],
+            paper_url="not-a-url",
+        )

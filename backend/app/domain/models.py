@@ -21,6 +21,12 @@ def _must_be_http_url(value: str) -> str:
 HttpUrlString = Annotated[str, AfterValidator(_must_be_http_url)]
 
 
+def _collapse_whitespace(value: object) -> object:
+    if isinstance(value, str):
+        return " ".join(value.split())
+    return value
+
+
 class ArticleCandidate(BaseModel):
     source_url: HttpUrlString
     canonical_url: HttpUrlString
@@ -38,6 +44,52 @@ class ArticleCandidate(BaseModel):
     @field_validator("excerpt", mode="before")
     @classmethod
     def empty_excerpt_to_none(cls, value: object) -> object:
+        if isinstance(value, str):
+            stripped = value.strip()
+            return stripped or None
+        return value
+
+
+class PaperCandidate(BaseModel):
+    arxiv_id: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    abstract: str = Field(min_length=1)
+    authors: list[str] = Field(min_length=1)
+    published_at: datetime | None = None
+    updated_at: datetime | None = None
+    paper_url: HttpUrlString
+    pdf_url: HttpUrlString | None = None
+    categories: list[str] = Field(default_factory=list)
+
+    @field_validator("arxiv_id", mode="before")
+    @classmethod
+    def strip_arxiv_id(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+    @field_validator("title", "abstract", mode="before")
+    @classmethod
+    def collapse_required_text(cls, value: object) -> object:
+        return _collapse_whitespace(value)
+
+    @field_validator("authors")
+    @classmethod
+    def authors_not_blank(cls, value: list[str]) -> list[str]:
+        cleaned = [item.strip() for item in value]
+        cleaned = [item for item in cleaned if item]
+        if not cleaned:
+            raise ValueError("authors must contain at least one name")
+        return cleaned
+
+    @field_validator("categories")
+    @classmethod
+    def drop_blank_categories(cls, value: list[str]) -> list[str]:
+        return [item.strip() for item in value if item.strip()]
+
+    @field_validator("pdf_url", mode="before")
+    @classmethod
+    def empty_pdf_url_to_none(cls, value: object) -> object:
         if isinstance(value, str):
             stripped = value.strip()
             return stripped or None

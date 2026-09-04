@@ -1,5 +1,8 @@
 from app.domain.models import ArticleCandidate
-from app.ingestion.errors import RssFetchError
+from app.ingestion.arxiv import DEFAULT_ARXIV_QUERY, ingest_arxiv
+from app.ingestion.arxiv_fetcher import ArxivFetcher
+from app.ingestion.arxiv_normalize import normalize_arxiv_entry
+from app.ingestion.errors import ArxivFetchError, RssFetchError
 from app.ingestion.fetcher import RssFetcher
 from app.ingestion.normalize import normalize_entry
 
@@ -17,4 +20,14 @@ def ingest_rss(
     return candidates
 
 
-__all__ = ["RssFetchError", "RssFetcher", "ingest_rss", "normalize_entry"]
+__all__ = [
+    "ArxivFetchError",
+    "ArxivFetcher",
+    "DEFAULT_ARXIV_QUERY",
+    "RssFetchError",
+    "RssFetcher",
+    "ingest_arxiv",
+    "ingest_rss",
+    "normalize_arxiv_entry",
+    "normalize_entry",
+]
