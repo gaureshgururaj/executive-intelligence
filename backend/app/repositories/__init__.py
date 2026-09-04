@@ -1,5 +1,9 @@
 from app.repositories.articles import ArticleRepository, StoredArticle
 from app.repositories.papers import PaperRepository, StoredPaper
+from app.repositories.recommendation_profiles import (
+    RecommendationProfileRepository,
+    StoredRecommendationProfile,
+)
 from app.repositories.sources import (
     OPENAI_NEWS_NAME,
     OPENAI_NEWS_URL,
@@ -13,9 +17,11 @@ __all__ = [
     "OPENAI_NEWS_NAME",
     "OPENAI_NEWS_URL",
     "PaperRepository",
+    "RecommendationProfileRepository",
     "SOURCE_TYPE_RSS",
     "SourceRepository",
     "StoredArticle",
     "StoredPaper",
+    "StoredRecommendationProfile",
     "StoredSource",
 ]

@@ -1,6 +1,6 @@
 from sqlalchemy.engine import Engine
 
-from app.db.models import Article, Paper, Source
+from app.db.models import Article, Paper, RecommendationProfileRow, Source
 from app.db.session import Base
 
 
@@ -9,4 +9,5 @@ def create_tables(engine: Engine) -> None:
     _ = Article
     _ = Paper
     _ = Source
+    _ = RecommendationProfileRow
     Base.metadata.create_all(engine)
