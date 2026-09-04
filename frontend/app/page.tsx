@@ -1,13 +1,18 @@
 import DashboardContent from "@/components/DashboardContent";
 import HealthIndicator from "@/components/HealthIndicator";
-import { fetchArticles, fetchPapers } from "@/lib/api";
+import {
+  fetchArticles,
+  fetchPapers,
+  fetchRecommendationProfiles,
+} from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [articles, papers] = await Promise.all([
+  const [articles, papers, profiles] = await Promise.all([
     fetchArticles(),
     fetchPapers(),
+    fetchRecommendationProfiles(),
   ]);
 
   return (
@@ -24,7 +29,11 @@ export default async function HomePage() {
         <HealthIndicator />
       </header>
 
-      <DashboardContent articles={articles} papers={papers} />
+      <DashboardContent
+        articles={articles}
+        papers={papers}
+        profiles={profiles}
+      />
     </main>
   );
 }

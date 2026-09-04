@@ -34,6 +34,30 @@ export type Paper = {
   created_at: string;
 };
 
+export type RecommendationProfile = {
+  id: string;
+  name: string;
+  interests: string[];
+};
+
+export type ArticleRecommendation = {
+  content_type: "article";
+  recommendation_score: number;
+  matched_interests: string[];
+  reason: string;
+  item: Article;
+};
+
+export type PaperRecommendation = {
+  content_type: "paper";
+  recommendation_score: number;
+  matched_interests: string[];
+  reason: string;
+  item: Paper;
+};
+
+export type RecommendationItem = ArticleRecommendation | PaperRecommendation;
+
 export function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 }
@@ -64,4 +88,33 @@ export async function fetchPapers(): Promise<Paper[]> {
     throw new Error(`Papers request failed with status ${response.status}`);
   }
   return (await response.json()) as Paper[];
+}
+
+export async function fetchRecommendationProfiles(): Promise<
+  RecommendationProfile[]
+> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/api/v1/recommendation-profiles`,
+    { cache: "no-store" },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Recommendation profiles request failed with status ${response.status}`,
+    );
+  }
+  return (await response.json()) as RecommendationProfile[];
+}
+
+export async function fetchRecommendations(
+  profileId: string,
+): Promise<RecommendationItem[]> {
+  const url = new URL(`${getApiBaseUrl()}/api/v1/recommendations`);
+  url.searchParams.set("profile_id", profileId);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(
+      `Recommendations request failed with status ${response.status}`,
+    );
+  }
+  return (await response.json()) as RecommendationItem[];
 }
