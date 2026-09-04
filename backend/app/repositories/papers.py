@@ -91,3 +91,15 @@ class PaperRepository:
             return {}
         rows = self._session.scalars(select(Paper).where(Paper.arxiv_id.in_(arxiv_ids)))
         return {row.arxiv_id: StoredPaper.model_validate(row) for row in rows}
+
+    def list_accepted(self) -> list[StoredPaper]:
+        rows = self._session.scalars(
+            select(Paper)
+            .where(Paper.accepted.is_(True))
+            .order_by(
+                Paper.published_at.desc().nulls_last(),
+                Paper.created_at.desc(),
+                Paper.id.desc(),
+            )
+        )
+        return [StoredPaper.model_validate(row) for row in rows]

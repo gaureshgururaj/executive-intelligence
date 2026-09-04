@@ -1,10 +1,11 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
+from app.db.models import Paper
 from app.domain.models import PaperCandidate, QualityDecision, ResearchAnalysis
 from app.repositories import PaperRepository
 
@@ -208,3 +209,110 @@ def test_get_by_arxiv_ids_returns_known_rows_only(db_session: Session) -> None:
     found = repo.get_by_arxiv_ids([ARXIV_ID, "missing.00000"])
     assert list(found) == [ARXIV_ID]
     assert found[ARXIV_ID] == saved
+
+
+def _set_created_at(session: Session, arxiv_id: str, created_at: datetime) -> None:
+    paper = session.scalar(select(Paper).where(Paper.arxiv_id == arxiv_id))
+    assert paper is not None
+    paper.created_at = created_at
+    session.flush()
+
+
+def test_list_accepted_returns_empty_when_no_papers(db_session: Session) -> None:
+    repo = PaperRepository(db_session)
+    assert repo.list_accepted() == []
+
+
+def test_list_accepted_includes_accepted_and_excludes_rejected(
+    db_session: Session,
+) -> None:
+    repo = PaperRepository(db_session)
+    accepted = repo.save(_candidate(), _analysis(), _accepted())
+    repo.save(
+        _candidate(arxiv_id="2401.00002", title="Rejected paper"),
+        _analysis(relevance_score=0.2),
+        _rejected(),
+    )
+    listed = repo.list_accepted()
+    assert [paper.arxiv_id for paper in listed] == [accepted.arxiv_id]
+    assert repo.get_by_arxiv_id("2401.00002") is not None
+
+
+def test_list_accepted_orders_by_published_at_desc_nulls_last(
+    db_session: Session,
+) -> None:
+    repo = PaperRepository(db_session)
+    older = datetime(2026, 8, 1, tzinfo=UTC)
+    repo.save(
+        _candidate(arxiv_id="2401.00001", title="Older", published_at=older),
+        _analysis(),
+        _accepted(),
+    )
+    repo.save(
+        _candidate(arxiv_id="2401.00002", title="Undated", published_at=None),
+        _analysis(),
+        _accepted(),
+    )
+    repo.save(
+        _candidate(
+            arxiv_id="2401.00003",
+            title="Newer",
+            published_at=older + timedelta(days=29),
+        ),
+        _analysis(),
+        _accepted(),
+    )
+    assert [paper.title for paper in repo.list_accepted()] == [
+        "Newer",
+        "Older",
+        "Undated",
+    ]
+
+
+def test_list_accepted_breaks_published_at_ties_by_created_at_desc(
+    db_session: Session,
+) -> None:
+    repo = PaperRepository(db_session)
+    published_at = datetime(2026, 9, 1, tzinfo=UTC)
+    repo.save(
+        _candidate(
+            arxiv_id="2401.00001", title="Older created", published_at=published_at
+        ),
+        _analysis(),
+        _accepted(),
+    )
+    repo.save(
+        _candidate(
+            arxiv_id="2401.00002", title="Newer created", published_at=published_at
+        ),
+        _analysis(),
+        _accepted(),
+    )
+    _set_created_at(db_session, "2401.00001", datetime(2026, 8, 1, tzinfo=UTC))
+    _set_created_at(db_session, "2401.00002", datetime(2026, 8, 2, tzinfo=UTC))
+    assert [paper.title for paper in repo.list_accepted()] == [
+        "Newer created",
+        "Older created",
+    ]
+
+
+def test_list_accepted_breaks_created_at_ties_by_id_desc(
+    db_session: Session,
+) -> None:
+    repo = PaperRepository(db_session)
+    published_at = datetime(2026, 9, 1, tzinfo=UTC)
+    created_at = datetime(2026, 8, 1, tzinfo=UTC)
+    first = repo.save(
+        _candidate(arxiv_id="2401.00001", title="First id", published_at=published_at),
+        _analysis(),
+        _accepted(),
+    )
+    second = repo.save(
+        _candidate(arxiv_id="2401.00002", title="Second id", published_at=published_at),
+        _analysis(),
+        _accepted(),
+    )
+    _set_created_at(db_session, first.arxiv_id, created_at)
+    _set_created_at(db_session, second.arxiv_id, created_at)
+    listed = repo.list_accepted()
+    assert [paper.id for paper in listed] == sorted([first.id, second.id], reverse=True)
