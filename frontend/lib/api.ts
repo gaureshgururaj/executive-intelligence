@@ -15,6 +15,25 @@ export type Article = {
   created_at: string;
 };
 
+export type Paper = {
+  id: string;
+  arxiv_id: string;
+  title: string;
+  abstract: string;
+  authors: string[];
+  published_at: string | null;
+  arxiv_updated_at: string | null;
+  paper_url: string;
+  pdf_url: string | null;
+  categories: string[];
+  summary: string;
+  category: string;
+  relevance_score: number;
+  key_findings: string[];
+  practical_implications: string[];
+  created_at: string;
+};
+
 export function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 }
@@ -35,4 +54,14 @@ export async function fetchArticles(): Promise<Article[]> {
     throw new Error(`Articles request failed with status ${response.status}`);
   }
   return (await response.json()) as Article[];
+}
+
+export async function fetchPapers(): Promise<Paper[]> {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/papers`, {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`Papers request failed with status ${response.status}`);
+  }
+  return (await response.json()) as Paper[];
 }

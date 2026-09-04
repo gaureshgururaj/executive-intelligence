@@ -198,6 +198,47 @@ h1 {
   color: var(--muted);
 }
 
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.mode-switch button {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+.mode-switch button[aria-pressed="true"] {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.mode-switch button:hover,
+.mode-switch button:focus-visible {
+  filter: brightness(1.05);
+}
+
+.mode-switch button[aria-pressed="true"]:hover,
+.mode-switch button[aria-pressed="true"]:focus-visible {
+  filter: brightness(1.08);
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -239,6 +280,15 @@ h1 {
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.card-authors {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .card-summary {
@@ -299,6 +349,18 @@ h1 {
   font-size: 0.9rem;
 }
 
+.source-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.1rem;
+  margin-top: 0.1rem;
+}
+
+.source-links .source-link {
+  margin-top: 0;
+}
+
 .source-link {
   width: fit-content;
   margin-top: 0.1rem;
@@ -307,6 +369,7 @@ h1 {
   font-weight: 600;
   letter-spacing: 0.02em;
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
 .source-link:hover,
@@ -423,5 +486,9 @@ h1 {
 
   .clear-filters {
     align-self: flex-start;
+  }
+
+  .mode-switch button {
+    min-height: 2.25rem;
   }
 }
