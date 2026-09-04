@@ -1,5 +1,6 @@
+import uuid
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import (
     AfterValidator,
@@ -160,3 +161,54 @@ class QualityDecision(BaseModel):
         if not self.accepted and not self.reason:
             raise ValueError("reason is required when accepted is false")
         return self
+
+
+ContentType = Literal["article", "paper"]
+
+
+class RecommendationProfile(BaseModel):
+    id: uuid.UUID
+    name: str = Field(min_length=1)
+    interests: list[str] = Field(default_factory=list)
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def strip_name(cls, value: object) -> object:
+        return _collapse_whitespace(value)
+
+    @field_validator("interests")
+    @classmethod
+    def normalize_interests(cls, value: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        seen: set[str] = set()
+        for item in value:
+            stripped = " ".join(item.split())
+            if not stripped or stripped in seen:
+                continue
+            seen.add(stripped)
+            cleaned.append(stripped)
+        return cleaned
+
+
+class RecommendableContent(BaseModel):
+    content_id: uuid.UUID
+    content_type: ContentType
+    title: str = Field(min_length=1)
+    category: str = Field(min_length=1)
+    relevance_score: float = Field(ge=0.0, le=1.0)
+    published_at: datetime | None = None
+    created_at: datetime
+    text: str
+
+    @field_validator("title", "category", mode="before")
+    @classmethod
+    def strip_required_text(cls, value: object) -> object:
+        return _collapse_whitespace(value)
+
+
+class Recommendation(BaseModel):
+    content_id: uuid.UUID
+    content_type: ContentType
+    recommendation_score: float = Field(ge=0.0, le=1.0)
+    matched_interests: list[str] = Field(min_length=1)
+    reason: str = Field(min_length=1)

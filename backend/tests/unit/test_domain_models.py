@@ -7,6 +7,8 @@ from app.domain.models import (
     ArticleCandidate,
     PaperCandidate,
     QualityDecision,
+    RecommendableContent,
+    RecommendationProfile,
     ResearchAnalysis,
     TrendAnalysis,
 )
@@ -198,4 +200,54 @@ def test_research_analysis_rejects_blank_summary() -> None:
             summary="   ",
             category="Agentic AI",
             relevance_score=0.8,
+        )
+
+
+def test_recommendation_profile_strips_name_and_interests() -> None:
+    profile = RecommendationProfile(
+        id="00000000-0000-0000-0000-000000000001",
+        name="  Agentic AI  ",
+        interests=["  LLMs  ", " AI Agents "],
+    )
+    assert profile.name == "Agentic AI"
+    assert profile.interests == ["LLMs", "AI Agents"]
+
+
+def test_recommendation_profile_rejects_blank_name() -> None:
+    with pytest.raises(ValidationError):
+        RecommendationProfile(
+            id="00000000-0000-0000-0000-000000000001",
+            name="   ",
+            interests=["LLMs"],
+        )
+
+
+def test_recommendation_profile_allows_empty_interests() -> None:
+    profile = RecommendationProfile(
+        id="00000000-0000-0000-0000-000000000001",
+        name="Empty",
+        interests=[],
+    )
+    assert profile.interests == []
+
+
+def test_recommendation_profile_drops_blank_and_duplicate_interests() -> None:
+    profile = RecommendationProfile(
+        id="00000000-0000-0000-0000-000000000001",
+        name="Applied LLMs",
+        interests=["LLMs", "  ", "LLMs", " RAG ", "LLMs"],
+    )
+    assert profile.interests == ["LLMs", "RAG"]
+
+
+def test_recommendable_content_rejects_relevance_out_of_range() -> None:
+    with pytest.raises(ValidationError):
+        RecommendableContent(
+            content_id="00000000-0000-0000-0000-000000000001",
+            content_type="article",
+            title="Title",
+            category="Category",
+            relevance_score=1.2,
+            created_at=datetime(2026, 9, 1, tzinfo=UTC),
+            text="language models",
         )
