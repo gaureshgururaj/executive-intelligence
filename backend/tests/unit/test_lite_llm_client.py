@@ -79,6 +79,28 @@ def test_json_schema_is_passed_as_structured_response_format() -> None:
     )
 
 
+def test_custom_json_schema_name_is_passed_through() -> None:
+    schema = {
+        "type": "object",
+        "properties": {"summary": {"type": "string"}},
+    }
+    client = LiteLlmClient(
+        model="claude-haiku-4-5",
+        json_schema=schema,
+        json_schema_name="research_analysis",
+    )
+    with patch("app.llm.lite.litellm.completion", return_value=_response("{}")) as mock:
+        client.complete("analyze this paper")
+
+    assert mock.call_args.kwargs["response_format"] == {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "research_analysis",
+            "schema": schema,
+        },
+    }
+
+
 def test_response_content_is_returned_as_plain_string() -> None:
     client = LiteLlmClient(model="gpt-4o-mini")
     with patch(

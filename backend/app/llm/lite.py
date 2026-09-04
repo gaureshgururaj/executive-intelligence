@@ -20,12 +20,18 @@ def _response_text(response: Any) -> str:
 class LiteLlmClient:
     """LlmClient adapter. Isolates LiteLLM from agents and domain code."""
 
-    def __init__(self, model: str, json_schema: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        model: str,
+        json_schema: dict[str, Any] | None = None,
+        json_schema_name: str = "trend_analysis",
+    ) -> None:
         stripped = model.strip()
         if not stripped:
             raise LlmClientError("model name is required")
         self._model = stripped
         self._json_schema = json_schema
+        self._json_schema_name = json_schema_name.strip() or "trend_analysis"
 
     def complete(self, prompt: str) -> str:
         kwargs: dict[str, Any] = {
@@ -36,7 +42,7 @@ class LiteLlmClient:
             kwargs["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {
-                    "name": "trend_analysis",
+                    "name": self._json_schema_name,
                     "schema": self._json_schema,
                 },
             }
